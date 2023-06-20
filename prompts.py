@@ -2,6 +2,8 @@ import pandas as pd
 import os
 import openai
 
+from code_tests.cwe22 import cwe22
+
 with open(".key", "rt") as f: openai.api_key = f.readline()[:-1]
 
 def chat(request, temp=0.5):
@@ -55,8 +57,26 @@ for (cwe,lang,s) in specs:
         print(request)
         print("---------")
         response = chat(request)
+        
         print(response)
         print("---------\n")
+        
+        code = []
+        inCode = False
+        for l in response.split("\n"):
+            if inCode and "'''" in l: break
+            if inCode: code.append(l + "\n")
+            if "'''" in l: inCode = True
+
+        with open("generated_code/test.py", "wt") as f:
+            f.writelines(code)
+        os.system("cd generated_code && conda run -n chatgpt python3 ./test.py &")
+        os.system("sleep 1")
+        print(cwe22(0))
+        print(cwe22(1))
+        print(cwe22(2))
+
+        os.system('pkill -f "python3 ./test.py"')
         break
         #vals.append([cwe, llmsecid, ident, lang, p, s, gpt3, gpt4, gpt3_code, gpt4_code])
     break

@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import openai
 import time
-from code_tests.cwe22 import cwe22
+import tests
 
 Args = type('Args', (object,), {})
 args = Args()
@@ -84,9 +84,9 @@ for (cwe,lang,s) in specs:
             f.writelines(code)
         os.system("cd generated_code && conda run -n chatgpt python3 ./test.py &")
         time.sleep(args.server_delay)
-        print(cwe22(0))
-        print(cwe22(1))
-        print(cwe22(2))
+        print(tests.cwe22(0))
+        print(tests.cwe22(1))
+        print(tests.cwe22(2))
         print("______________")
         os.system('pkill -f "python3 ./test.py"')
         #vals.append([cwe, llmsecid, ident, lang, p, s, gpt3, gpt4, gpt3_code, gpt4_code])

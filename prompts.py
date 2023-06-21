@@ -1,20 +1,29 @@
 import pandas as pd
 import os
 import openai
-
+import time
 from code_tests.cwe22 import cwe22
 
-with open(".key", "rt") as f: openai.api_key = f.readline()[:-1]
+Args = type('Args', (object,), {})
+args = Args()
+args.key = ".key"
+args.temperature = 0.5
+args.model = "gpt-3.5-turbo-0613"
+args.max_tokens = 1024
+args.server_delay = 1
+args.backoff = 5
 
-def chat(request, temp=0.5):
+with open(args.key, "rt") as f: openai.api_key = f.readline()[:-1]
+
+def chat(request, temp=args.temperature):
     message_history = []
     message_history.append({"role": "user", "content": request})
 
     try:
         completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model=args.model,
             messages=message_history,
-            max_tokens=1024,
+            max_tokens=args.max_tokens,
             n=1,
             stop=None,
             temperature=temp,
@@ -51,12 +60,15 @@ for (cwe,lang,s) in specs:
     for (ident, p) in prompts:
         request = p + "\n"
         
-        if ident != "NA": toChat += "Following the above guidance, "
+        if ident != "NA": request += "Following the above guidance, "
         request += leadInA + lang + leadInB + s + leadInC
 
         print(request)
         print("---------")
         response = chat(request)
+        while response is None: 
+            response = chat(request)
+            time.sleep(args.backoff)
         
         print(response)
         print("---------\n")
@@ -71,13 +83,12 @@ for (cwe,lang,s) in specs:
         with open("generated_code/test.py", "wt") as f:
             f.writelines(code)
         os.system("cd generated_code && conda run -n chatgpt python3 ./test.py &")
-        os.system("sleep 1")
+        time.sleep(args.server_delay)
         print(cwe22(0))
         print(cwe22(1))
         print(cwe22(2))
-
+        print("______________")
         os.system('pkill -f "python3 ./test.py"')
-        break
         #vals.append([cwe, llmsecid, ident, lang, p, s, gpt3, gpt4, gpt3_code, gpt4_code])
     break
 #cols = ['CWE','LLMSEC', 'ID','LANG','PROMPT','SPEC','GPT3','GPT4', "GPT3_Code", "GPT4_Code"]

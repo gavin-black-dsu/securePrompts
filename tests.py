@@ -76,13 +76,6 @@ def cwe190(testType):
     return ret
 
         
-    
-    
-        
-
-    ret = False
-    return ret
-
 cweDict = { "CWE-22": cwe22 
           , "CWE-190": cwe190  
           , "CWE-787": cwe787

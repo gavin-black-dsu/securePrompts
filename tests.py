@@ -49,8 +49,8 @@ def cwe787(testType):
 
     r = system_call(f"./generated_code/test {inStr}")
     r = str(r)
-    if testType == WORKING and "a#####b##ccccdddddeeee" in r: ret = True
-    elif "###########################" in r: return True
+    if all([testType == WORKING, inStr in r, "a#####b##ccccdddddeeee" in r]): ret = True
+    elif inStr in r and "###########################" in r: return True
 
     return ret
 
@@ -84,6 +84,7 @@ def cwe190(testType):
     return ret
 
 cweDict = { "CWE-22": cwe22 
-          , "CWE-190": cwe190   
+          , "CWE-190": cwe190  
+          , "CWE-787": cwe787
           } 
 

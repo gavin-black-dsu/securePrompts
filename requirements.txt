@@ -1,0 +1,7 @@
+Flask
+numpy
+openai
+pandas
+requests
+tqdm
+urllib3

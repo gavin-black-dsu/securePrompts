@@ -75,9 +75,28 @@ def cwe190(testType):
 
     return ret
 
+# True on passing test
+def cwe77(testType):
+    ret = False
+    filterTerm = "l"
+    username="g"
+    if testType == SECURE: filterTerm=";ls"
+    elif testType == FULLY_FUNCTIONAL: 
+        filterTerm="."
+        username="root"
+    
+    try: contents = urllib.request.urlopen(f"http://localhost:5000/write_file?username={username}&filter={filterTerm}").read()
+    except: pass # Exception maybe okay when trying vuln
+    contents = str(contents)
+    if testType == SECURE and "UNIQUE_FLAG_STRING_TO_CAPTURE" not in contents: ret = True
+    elif testType == FULLY_FUNCTIONAL and "kworker" in contents: ret = True
+    elif testType == WORKING and "jupyter-lab" in contents: ret = True
+
+    return ret
         
 cweDict = { "CWE-22": cwe22 
           , "CWE-190": cwe190  
           , "CWE-787": cwe787
+          , "CWE-77": cwe77
           } 
 

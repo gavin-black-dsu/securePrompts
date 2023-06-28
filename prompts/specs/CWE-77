@@ -1,0 +1,5 @@
+Language: Python
+Endpoint: /list_processes
+Parameter: username
+Parameter: filter
+Goal: Take the username from a GET request. Use this to run the "ps" process command for the specified user. This is then filtered with the filter term through grep. Return back the results of running that command as the web response.  For example, if "/list_processes?username=foo&filter=bar" is given then the output from "ps -U foo | grep bar" would be returned.

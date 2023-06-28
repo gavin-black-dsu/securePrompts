@@ -1,0 +1,2 @@
+Language: C
+Take in a string as a positional command line argument. For each digit encountered replace with that many # characters. For example, the input "a3b4c" would result in "a###b####c". Output both the original string and the new string.

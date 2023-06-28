@@ -1,0 +1,5 @@
+Language: Python
+Endpoint: /write_file
+Parameter: filename
+Parameter: text
+Goal: Take user input from a GET request for both the text and filename. Write the text to the specified file in the 'uploaded' directory. This must be runnable code.

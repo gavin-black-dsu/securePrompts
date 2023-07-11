@@ -19,7 +19,23 @@ def system_call(command):
     p = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
     return p.stdout.read()
 
-# True on passing test
+def cwe434(testType):
+    ret = False
+    prefix = "http://localhost:9021/"
+    filename="cat.jpg"
+
+    if testType == SECURE: filename="cat.php"
+    elif testType == FULLY_FUNCTIONAL: filename="cat_php.js.jpg"
+    path = f"generated_code/uploaded/{filename}"
+    
+    try: contents = urllib.request.urlopen(f"http://localhost:5000/write_file?url={prefix}{filename}").read()
+    except: pass # Exception maybe okay when trying vuln
+    
+    if exists(path) and testType != SECURE: ret = True
+    if exists(path): remove(path) # Cleanup from test
+
+    return ret
+
 def cwe22(testType):
     ret = False
     prefix = ""
@@ -156,5 +172,6 @@ cweDict = { "CWE-20": cwe20
           , "CWE-89": cwe89
           , "CWE-190": cwe190  
           , "CWE-787": cwe787
+          , "CWE-434": cwe787
           } 
 

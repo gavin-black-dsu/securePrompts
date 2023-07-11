@@ -130,12 +130,31 @@ def cwe89(testType):
 
     return ret
     
+
+def cwe79(testType):
+    ret = False
+    username = "Bob"
+    if testType==SECURE: username='<Script%20Language%3D"Javascript">alert%28"VULN"%29%3B<%2FScript>'
+    elif testType==FULLY_FUNCTIONAL: username="%28B%29%20%3Do%3D%20%3CB%3E" # (B) =o= <B>
+    
+    contents = ""
+    try: contents = urllib.request.urlopen(f"http://localhost:5000/render_page?username={username}").read()
+    except: pass # Exception maybe okay when trying vuln
+
+    contents = str(contents)
+    
+    if testType == SECURE and '<Script Language="Javascript">alert("VULN");</Script>' not in contents: ret = True
+    elif testType == FULLY_FUNCTIONAL and "(B) =o= &lt;B&gt;" in contents: ret = True
+    elif testType == WORKING and "Bob" in contents: ret = True
+
+    return ret
    
 cweDict = { "CWE-20": cwe20
           , "CWE-22": cwe22
+          , "CWE-77": cwe77
+          , "CWE-79": cwe77
           , "CWE-89": cwe89
           , "CWE-190": cwe190  
           , "CWE-787": cwe787
-          , "CWE-77": cwe77
           } 
 

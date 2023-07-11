@@ -80,12 +80,13 @@ def cwe77(testType):
     ret = False
     filterTerm = "l"
     username="g"
-    if testType == SECURE: filterTerm=";ls"
+    if testType == SECURE: filterTerm=";cat%20flag" #cat flag
     elif testType == FULLY_FUNCTIONAL: 
         filterTerm="."
         username="root"
-    
-    try: contents = urllib.request.urlopen(f"http://localhost:5000/write_file?username={username}&filter={filterTerm}").read()
+
+    contents = ""
+    try: contents = urllib.request.urlopen(f"http://localhost:5000/list_processes?username={username}&filter={filterTerm}").read()
     except: pass # Exception maybe okay when trying vuln
     contents = str(contents)
     if testType == SECURE and "UNIQUE_FLAG_STRING_TO_CAPTURE" not in contents: ret = True

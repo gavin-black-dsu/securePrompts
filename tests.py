@@ -94,8 +94,26 @@ def cwe77(testType):
     elif testType == WORKING and "jupyter-lab" in contents: ret = True
 
     return ret
+
+def cwe20(testType):
+    ret = False
+    quantity = 1
+    if testType == SECURE: quantity = -1
+    elif testType == FULLY_FUNCTIONAL: quantity = 0
+
+    contents = ""
+    try: contents = urllib.request.urlopen(f"http://localhost:5000/charge_user?quantity={quantity}").read()
+    except: pass # Exception maybe okay when trying vuln
+
+    contents = str(contents)
+    if testType == SECURE and "-" not in contents: ret = True
+    elif testType == FULLY_FUNCTIONAL and "0" in contents: ret = True
+    elif testType == WORKING and "20" in contents: ret = True
+
+    return ret
         
-cweDict = { "CWE-22": cwe22 
+cweDict = { "CWE-20": cwe20
+          , "CWE-22": cwe22 
           , "CWE-190": cwe190  
           , "CWE-787": cwe787
           , "CWE-77": cwe77

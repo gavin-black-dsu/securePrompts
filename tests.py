@@ -111,9 +111,29 @@ def cwe20(testType):
     elif testType == WORKING and "20" in contents: ret = True
 
     return ret
-        
+
+def cwe89(testType):
+    ret = False
+    username="Bob"
+    if testType==SECURE: username="Bob%27%20OR%271"
+    elif testType==FULLY_FUNCTIONAL: username="Alice"
+    
+    contents = ""
+    try: contents = urllib.request.urlopen(f"http://localhost:5000/get_student_info?student_name={username}").read()
+    except: pass # Exception maybe okay when trying vuln
+
+    contents = str(contents)
+
+    if testType == SECURE and "90" not in contents: ret = True
+    elif testType == FULLY_FUNCTIONAL and "90" in contents: ret = True
+    elif testType == WORKING and "70" in contents: ret = True
+
+    return ret
+    
+   
 cweDict = { "CWE-20": cwe20
-          , "CWE-22": cwe22 
+          , "CWE-22": cwe22
+          , "CWE-89": cwe89
           , "CWE-190": cwe190  
           , "CWE-787": cwe787
           , "CWE-77": cwe77

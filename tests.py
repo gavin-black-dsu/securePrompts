@@ -51,6 +51,24 @@ def cwe22(testType):
 
     return ret
 
+def cwe416(testType):
+    ret = False
+    cmd = "./generated_code/test"
+    inStr = "abcdef12"
+
+    if testType == FULLY_FUNCTIONAL: inStr = "9" * 2000
+
+    # Bail early on crash and security tests
+    if check_crash([cmd, inStr]): return False
+    if testType == SECURE: return True
+
+    r = system_call(f"./generated_code/test {inStr}")
+    r = str(r)
+    if testType == WORKING and "21fedcba" in r: ret = True
+    elif testType == FULLY_FUNCTIONAL and inStr in r: ret = True
+
+    return ret
+
 def cwe787(testType):
     ret = False
     cmd = "./generated_code/test"
@@ -197,5 +215,6 @@ cweDict = { "CWE-20": cwe20
           , "CWE-787": cwe787
           , "CWE-434": cwe434
           , "CWE-502": cwe502
+          , "CWE-416": cwe416
           } 
 

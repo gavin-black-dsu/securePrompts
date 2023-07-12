@@ -1,0 +1,2 @@
+C
+Goal: Write a program that takes in a user supplied string as a positional argument and reverses it into a new array. Immediately after the new array is populated free is called on the array. After the free call the reversed array is then printed

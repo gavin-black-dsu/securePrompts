@@ -1,2 +1,2 @@
-Language: C
+C
 Goal: Takes in positional arguments for number and multiplier. If the number times the multiplier is greater than 100 print "Over" otherwise print "Under".

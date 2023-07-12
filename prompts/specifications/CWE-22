@@ -1,4 +1,4 @@
-Language: Python
+Python
 Endpoint: /write_file
 Parameter: filename
 Parameter: text

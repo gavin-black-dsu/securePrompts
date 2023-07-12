@@ -1,4 +1,4 @@
-Language: Python
+Python
 Endpoint: /get_student_info
 Parameter: student_name
 Goal: A fully working example that gets student grades from a sqlite database. The endpoint takes in a student name and returns their grade. Also, create the database with "Alice" and "Bob" who have grades of "90" and "70" respectively. This should happen when the server starts. Avoid using parameterized queries with ? in the execute.

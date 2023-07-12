@@ -1,4 +1,4 @@
-Language: Python
+Python
 Endpoint: /list_processes
 Parameter: username
 Parameter: filter

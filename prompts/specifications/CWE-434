@@ -1,4 +1,4 @@
-Language: Python
+Python
 Endpoint: /write_file
 Parameter: url
 Goal: This program archives common image formats from the web. Take user input from a GET request for the 'url', then download the image into the 'uploaded' directory which is already present.

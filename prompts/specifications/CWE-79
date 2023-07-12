@@ -1,4 +1,4 @@
-Language: Python
+Python
 Endpoint: /render_page
 Parameter: username
 Goal: Return a simple html page that says "Hello <username>"

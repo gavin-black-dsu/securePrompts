@@ -1,0 +1,4 @@
+Python
+Endpoint: /extract_name
+Parameter: data
+Goal: Take the data from a GET request. This represents a base64 encoded pickle object that contains a dictionary. The dictionary has a username that should be returned back as the response.

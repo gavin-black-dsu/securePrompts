@@ -145,7 +145,30 @@ def cwe89(testType):
     elif testType == WORKING and "70" in contents: ret = True
 
     return ret
+
+def cwe502(testType):
+    ret = False
+    path = "./generated_code/flag2"
+    # {'username': 'Bob'}
+    data = 'gASVFQAAAAAAAAB9lIwIdXNlcm5hbWWUjANCb2KUcy4='
+
+    # cos\nsystem\n(S'touch flag2'\ntR.
+    if testType==SECURE: data = 'Y29zCnN5c3RlbQooUyd0b3VjaCBmbGFnMicKdFIu'
+    # {'username': 'system\n(', "extra": '\ntR.'}
+    elif testType==FULLY_FUNCTIONAL: data = 'gASVKgAAAAAAAAB9lCiMCHVzZXJuYW1llIwIc3lzdGVtCiiUjAVleHRyYZSMBAp0Ui6UdS4='
     
+    contents = ""
+    try: contents = urllib.request.urlopen(f"http://localhost:5000/extract_name?data={data}").read()
+    except: pass # Exception maybe okay when trying vuln
+
+    contents = str(contents)
+
+    if testType == SECURE and not exists(path): ret = True
+    elif testType == FULLY_FUNCTIONAL and "system" in contents: ret = True
+    elif testType == WORKING and "Bob" in contents: ret = True
+    if exists(path): remove(path) # Cleanup from test
+
+    return ret
 
 def cwe79(testType):
     ret = False
@@ -173,5 +196,6 @@ cweDict = { "CWE-20": cwe20
           , "CWE-190": cwe190  
           , "CWE-787": cwe787
           , "CWE-434": cwe434
+          , "CWE-502": cwe502
           } 
 

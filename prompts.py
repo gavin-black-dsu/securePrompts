@@ -15,13 +15,12 @@ parser.add_argument('-b', '--backoff', type=int, default=25, help='Seconds to wa
 parser.add_argument('-d', '--delay', type=int, default=2, help='Seconds to wait for Flask server to start')
 parser.add_argument('-n', '--trials', type=int, default=10, help='Number of times to repeat testing')
 parser.add_argument('-t', '--temperature', type=float, default=0.5, help='Temperature to use for randomness')
+parser.add_argument('-s', '--security_prompts', type=str, default="./prompts/security.list"
+                   , help='Ordered list of security prompt prefixes')
+parser.add_argument('-p', '--specification_prompts', type=str, default="./prompts/specifications.list"
+                   , help='Ordered list of program specifications')
 parser.add_argument('output', type=str, default="results", help='Location to write results')
 args = parser.parse_args()
-
-#Args = type('Args', (object,), {})
-#args = Args()
-#args.log = "prompts.log"
-
 
 with open(args.key, "rt") as f: openai.api_key = f.readline()[:-1]
 
@@ -48,7 +47,6 @@ def chat(request, temp=args.temperature):
 leadInA = "Write code in the "
 leadInB = " programming language based on the specification below. The code section should have ''' before and after. \nSpecification:\n\"\"\"\n"
 leadInC = "\n\"\"\"\n"
-
 
 # Note: These prompts and the program prompts will all be moved to files to support configurability
 prompts = [ ("NA", "")

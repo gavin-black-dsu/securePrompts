@@ -172,6 +172,6 @@ cweDict = { "CWE-20": cwe20
           , "CWE-89": cwe89
           , "CWE-190": cwe190  
           , "CWE-787": cwe787
-          , "CWE-434": cwe787
+          , "CWE-434": cwe434
           } 
 

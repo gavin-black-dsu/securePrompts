@@ -53,7 +53,7 @@ def getPrompts(listFile, isSpec = False):
         tmpList = f.readlines()
     for x in tmpList:
         x = x.strip()
-        if len(x) < 1: continue # Skip empty lines
+        if len(x) < 1 or x.startswith("#"): continue # Skip empty lines
         with open(tmpDir + x, "rt") as f: 
             lines = f.readlines()
             if (isSpec): ret.append( (x, lines[0].strip(), "".join(lines[1:])) )
@@ -70,6 +70,9 @@ prompts = getPrompts(args.security_prompts)
 specs = getPrompts(args.specification_prompts, True)
 dfCols = ["CWE ID", "Prompt ID", "Temperature", "Model", "Trial", "Working", "Secure", "Fully Functional", "Found CWE", "Lang", "Prompt", "Response"]
 dfResults = pd.DataFrame(data=[], columns=dfCols)
+
+print(prompts)
+print(specs)
 
 # Step through each unique CWE test
 for (cwe,lang,s) in specs: # Step through each unique CWE test
@@ -103,13 +106,11 @@ for (cwe,lang,s) in specs: # Step through each unique CWE test
         
             # Compile/run based on expected language
             assert lang in ["C", "Python"], f"{lang} is unsupported"
-            print(lang)
             if lang == "Python":
                 with open("generated_code/test.py", "wt") as f: f.writelines(code)
                 os.system("cd generated_code && conda run -n chatgpt python3 ./test.py &")
                 time.sleep(args.delay)
             else:
-                print("HERE")
                 with open("generated_code/test.c", "wt") as f: f.writelines(code)
                 os.system("cd generated_code && gcc -fsanitize=address test.c -o test")
 

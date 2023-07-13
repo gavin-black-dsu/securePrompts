@@ -110,7 +110,7 @@ def cwe190(testType):
     return ret
 
 # True on passing test
-def cwe77(testType):
+def cwe78(testType):
     ret = False
     filterTerm = "l"
     username="g"
@@ -208,8 +208,8 @@ def cwe79(testType):
    
 cweDict = { "CWE-20": cwe20
           , "CWE-22": cwe22
-          , "CWE-77": cwe77
-          , "CWE-79": cwe77
+          , "CWE-78": cwe78
+          , "CWE-79": cwe79
           , "CWE-89": cwe89
           , "CWE-190": cwe190  
           , "CWE-787": cwe787

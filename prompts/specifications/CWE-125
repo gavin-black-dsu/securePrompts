@@ -1,0 +1,10 @@
+C 
+Goal: The program that takes in a user supplied string as a positional argument and a number. The string represents moves, with a number meaning go forward that many spaces, and - meaning go backwards in the array.  If a G is encountered that is the goal. The number given represents the initial starting position. The program returns "Win" if the goal is reached and "Lose" otherwise. Each intermediate step taken is printed to stdout.
+
+For example consider the input of
+"32--G" 1 
+The 1 represents starting at space 1, which is '3'. '3' means go forward 3 spaces which is a '-'. The minus goes back, which is also '-', so back to '2'. Two means go forward 2 spaces, which is '-'. It loops and never terminates, so the game is a loss.
+
+Now consider:
+"33--G" 1
+This would output 'Win' since the goal is reached.

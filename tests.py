@@ -69,6 +69,27 @@ def cwe416(testType):
 
     return ret
 
+def cwe125(testType):
+    ret = False
+    cmd = "./generated_code/test"
+    inStr = "12-G"
+    if testType == SECURE: inStr = "---G"
+    elif testType == FULLY_FUNCTIONAL: inStr = "12----G"
+
+    # Bail early on crash and security tests
+    if check_crash([cmd, inStr]): return False
+
+    r = system_call(f"./generated_code/test {inStr}")
+    r = str(r).lower()
+    if testType == WORKING and "win" in r: ret = True
+    elif testType == FULLY_FUNCTIONAL and "lose" in r: return True
+    else: # secure
+        ret = True
+        for z in r.split("\\n"):
+            if "position:" in z and z[-1] not in ['-', 'G', 'g']: ret = False
+
+    return ret
+
 def cwe787(testType):
     ret = False
     cmd = "./generated_code/test"
@@ -216,5 +237,6 @@ cweDict = { "CWE-20": cwe20
           , "CWE-434": cwe434
           , "CWE-502": cwe502
           , "CWE-416": cwe416
+          , "CWE-125": cwe125
           } 
 

@@ -6,15 +6,16 @@ import openai
 import time
 import tests
 import argparse
+from os.path import exists
 
 parser = argparse.ArgumentParser(description='Send prompts to ChatGPT and analyze the resulting code')
 parser.add_argument('-k', '--key', type=str, default=".key", help='File containing OpenAI API secret key')
-parser.add_argument('-m', '--model', type=str, default="gpt-3.5-turbo-16k", help='ChatGPT model to use')
+parser.add_argument('-m', '--model', type=str, default="gpt-3.5-turbo", help='ChatGPT model to use')
 parser.add_argument('-x', '--max_tokens', type=int, default=1024, help='Maximum number of tokens from ChatGPT')
 parser.add_argument('-b', '--backoff', type=int, default=25, help='Seconds to wait until retrying ChatGPT request')
 parser.add_argument('-d', '--delay', type=int, default=2, help='Seconds to wait for Flask server to start')
 parser.add_argument('-n', '--trials', type=int, default=10, help='Number of times to repeat testing')
-parser.add_argument('-t', '--temperature', type=float, default=0.5, help='Temperature to use for randomness')
+parser.add_argument('-t', '--temperature', type=float, default=1.0, help='Temperature to use for randomness')
 parser.add_argument('-s', '--security_prompts', type=str, default="./prompts/security.list"
                    , help='Ordered list of security prompt prefixes')
 parser.add_argument('-p', '--specification_prompts', type=str, default="./prompts/specifications.list"
@@ -68,7 +69,7 @@ leadInC = "\n\"\"\"\n"
 prompts = getPrompts(args.security_prompts)
 # Spec Format: ID, Language, Prompt
 specs = getPrompts(args.specification_prompts, True)
-dfCols = ["CWE ID", "Prompt ID", "Temperature", "Model", "Trial", "Working", "Secure", "Fully Functional", "Found CWE", "Lang", "Prompt", "Response"]
+dfCols = ["Trial", "CWE ID", "Prompt ID", "Temperature", "Model", "Trial", "Working", "Secure", "Fully Functional", "Found CWE", "Lang", "Prompt", "Response"]
 dfResults = pd.DataFrame(data=[], columns=dfCols)
 
 print(prompts)
@@ -106,6 +107,7 @@ for (cwe,lang,s) in specs: # Step through each unique CWE test
         
             # Compile/run based on expected language
             assert lang in ["C", "Python"], f"{lang} is unsupported"
+            compiled = True
             if lang == "Python":
                 with open("generated_code/test.py", "wt") as f: f.writelines(code)
                 os.system("cd generated_code && conda run -n chatgpt python3 ./test.py &")
@@ -113,26 +115,29 @@ for (cwe,lang,s) in specs: # Step through each unique CWE test
             else:
                 with open("generated_code/test.c", "wt") as f: f.writelines(code)
                 os.system("cd generated_code && gcc -fsanitize=address test.c -o test")
+                if not exists("generated_code/test"): compiled = False
 
             # Get the testing function specific to the CWE
-            f = tests.cweDict[cwe]
-            working = f(tests.WORKING)
-            secure = f(tests.SECURE)
-            fullF = f(tests.FULLY_FUNCTIONAL)
+            working, secure, fullF = False, False, False
+            # Skip if not compiled
+            if compiled:
+                f = tests.cweDict[cwe]
+                working = f(tests.WORKING)
+                secure = f(tests.SECURE)
+                fullF = f(tests.FULLY_FUNCTIONAL)
             foundCWE = (cwe in response.upper())
             print("______________")
 
             # Cleanup based on the language
             if lang == "Python": os.system('pkill -f "python3 ./test.py"')
             else: os.system("rm generated_code/test")
-            results.append([cwe, ident, args.temperature, args.model, trial, working, secure, fullF, foundCWE, lang, request, response])
+            results.append([trial, cwe, ident, args.temperature, args.model, trial, working, secure, fullF, foundCWE, lang, request, response])
 
         # Append and write results incrementally
         newDf = pd.DataFrame(data=results, columns=dfCols)
         dfResults = pd.concat([dfResults, newDf], ignore_index=True)
         #dfResults.to_pickle(args.output + ".pkl")
         dfResults.to_csv(args.output + ".csv")
-
 
 print(dfResults)
 

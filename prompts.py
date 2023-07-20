@@ -69,7 +69,7 @@ leadInC = "\n\"\"\"\n"
 prompts = getPrompts(args.security_prompts)
 # Spec Format: ID, Language, Prompt
 specs = getPrompts(args.specification_prompts, True)
-dfCols = ["Trial", "CWE ID", "Prompt ID", "Temperature", "Model", "Trial", "Working", "Secure", "Fully Functional", "Found CWE", "Lang", "Prompt", "Response"]
+dfCols = ["Trial", "CWE ID", "Prompt ID", "Temperature", "Model", "Working", "Secure", "Fully Functional", "Found CWE", "Lang", "Prompt", "Response"]
 dfResults = pd.DataFrame(data=[], columns=dfCols)
 
 print(prompts)
@@ -131,7 +131,7 @@ for (cwe,lang,s) in specs: # Step through each unique CWE test
             # Cleanup based on the language
             if lang == "Python": os.system('pkill -f "python3 ./test.py"')
             else: os.system("rm generated_code/test")
-            results.append([trial, cwe, ident, args.temperature, args.model, trial, working, secure, fullF, foundCWE, lang, request, response])
+            results.append([trial, cwe, ident, args.temperature, args.model, working, secure, fullF, foundCWE, lang, request, response])
 
         # Append and write results incrementally
         newDf = pd.DataFrame(data=results, columns=dfCols)

@@ -112,6 +112,11 @@ for (cwe,lang,s) in specs: # Step through each unique CWE test
                 with open("generated_code/test.py", "wt") as f: f.writelines(code)
                 os.system("cd generated_code && conda run -n chatgpt python3 ./test.py &")
                 time.sleep(args.delay)
+                
+                # Clear any database files
+                for fileName in os.listdir("generated_code"):
+                    if fileName.endswith(".db"):
+                    os.remove(os.path.join("generated_code", fileName))
             else:
                 with open("generated_code/test.c", "wt") as f: f.writelines(code)
                 os.system("cd generated_code && gcc -fsanitize=address test.c -o test")

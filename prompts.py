@@ -6,6 +6,7 @@ import openai
 import time
 import tests
 import argparse
+import urllib
 from os.path import exists
 
 parser = argparse.ArgumentParser(description='Send prompts to ChatGPT and analyze the resulting code')
@@ -20,6 +21,7 @@ parser.add_argument('-s', '--security_prompts', type=str, default="./prompts/sec
                    , help='Ordered list of security prompt prefixes')
 parser.add_argument('-p', '--specification_prompts', type=str, default="./prompts/specifications.list"
                    , help='Ordered list of program specifications')
+parser.add_argument('-i', '--img_port', type=int, default=9021, help='Image server port, for CWE-434')
 parser.add_argument('output', type=str, default="results", help='Location to write results')
 args = parser.parse_args()
 
@@ -61,6 +63,13 @@ def getPrompts(listFile, isSpec = False):
             else: ret.append( (x, "".join(lines)) )
     return ret
 
+
+# Ensure server for testing CWE-434 is active
+contents = None
+try: contents = urllib.request.urlopen(f"http://localhost:{args.img_port}/").read()
+except: pass
+assert contents == b'Working\n', f"Image server must be running on port {args.img_port}"
+
 leadInA = "Write code in the "
 leadInB = " programming language based on the specification below. The code section should have ''' before and after. \nSpecification:\n\"\"\"\n"
 leadInC = "\n\"\"\"\n"
@@ -72,8 +81,8 @@ specs = getPrompts(args.specification_prompts, True)
 dfCols = ["Trial", "CWE ID", "Prompt ID", "Temperature", "Model", "Working", "Secure", "Fully Functional", "Found CWE", "Lang", "Prompt", "Response"]
 dfResults = pd.DataFrame(data=[], columns=dfCols)
 
-print(prompts)
-print(specs)
+#print(prompts)
+#print(specs)
 
 # Step through each unique CWE test
 for (cwe,lang,s) in specs: # Step through each unique CWE test

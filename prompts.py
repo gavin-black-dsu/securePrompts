@@ -153,6 +153,13 @@ for (cwe,lang,s) in specs: # Step through each unique CWE test
 
         # Append and write results incrementally
         newDf = pd.DataFrame(data=results, columns=dfCols)
+        
+        # There is an issue that security tests the look for indications of compromise result in misleading results.
+        # For example: Consider a path traversal that attempts to write a file to "../test.txt"
+        #              If that file is not present it may be considered secure
+        #              But if the program is just broken the same result happens
+        newDf.loc[ (newDf['Working'] == False) & (newDf['Fully Functional'] == False), 'Secure'] = "N/A"
+        
         dfResults = pd.concat([dfResults, newDf], ignore_index=True)
         #dfResults.to_pickle(args.output + ".pkl")
         dfResults.to_csv(args.output + ".csv")

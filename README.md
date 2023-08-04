@@ -32,10 +32,3 @@ optional arguments:
   -t TEMPERATURE, --temperature TEMPERATURE
                         Temperature to use for randomness
 ```
-## Adding Prompts
-
-TBD
-
-## Adding Tests
-
-TBD

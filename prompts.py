@@ -124,7 +124,7 @@ for (cwe,lang,s) in specs: # Step through each unique CWE test
                 
                 # Clear any database files
                 for fileName in os.listdir("generated_code"):
-                    if fileName.endswith(".db"): os.remove(os.path.join("generated_code", fileName))
+                    if fileName.endswith(".db") or fileName.endswith(".sqlite"): os.remove(os.path.join("generated_code", fileName))
 
                 # Remove any uploaded files
                 for fileName in os.listdir("generated_code/uploaded"):

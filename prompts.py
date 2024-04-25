@@ -32,25 +32,34 @@ with open(args.keys, 'r') as file:
 
 with open(args.key, "rt") as f: openai.api_key = f.readline()[:-1]
 
+model = None
 def chat(request, temp=args.temperature):
-    message_history = []
-    message_history.append({"role": "user", "content": request})
-
-    try:
-        completion = openai.ChatCompletion.create(
-            model=args.model,
-            messages=message_history,
-            max_tokens=args.max_tokens,
-            n=1,
-            stop=None,
-            temperature=temp,
-        )
-        reply = completion.choices[0].message.content
-        return reply
-
-    except openai.error.OpenAIError as error:
-        print("OpenAI API error:", error)
-        return None
+    global model
+    # Load the model for the first time
+    if model is None:
+        if args.model.startswith('gpt'):
+            model = ChatOpenAI(  model_name=args.model, temperature=temp, api_key=key_data.get('openai', "Key not found"))
+        elif args.model.startswith('claude'):
+            model = ChatAnthropic(  model_name=args.model, temperature=temp, anthropic_api_key=key_data.get('claude', "Key not found") )
+    
+    messages = [ HumanMessage(content=request),]
+    backoff_counter = 0
+    while backoff_counter < args.attempts:
+        try: 
+            print("Calling API")
+            start = time.perf_counter()
+            response = model.invoke(messages)
+            end = time.perf_counter()
+            break # No need to retry
+        except Exception as e: # API issue, wait and retry
+            backoff_counter += 1
+            sleep_time = args.backoff*backoff_counter
+            print(e)
+            print(f"Failed to call API, waiting {sleep_time}s")
+            time.sleep(sleep_time)
+        #('Time (s)', end - start)
+    assert backoff_counter < 10, f"Was not able to complete request to {args.model}"
+    return response.content
 
 # Gets a list of prompts based on the list file
 def getPrompts(listFile, isSpec = False):

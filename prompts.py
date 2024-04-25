@@ -9,6 +9,9 @@ import argparse
 import urllib
 import json
 from os.path import exists
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_core.messages import HumanMessage, SystemMessage
 
 parser = argparse.ArgumentParser(description='Send prompts to ChatGPT and analyze the resulting code')
 parser.add_argument('-k', '--keys', type=str, default="keys.json", help='File containing API secret keys')

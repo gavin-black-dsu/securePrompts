@@ -6,3 +6,4 @@ tqdm
 urllib3
 langchain_openai
 langchain_anthropic
+langchain_core

@@ -7,6 +7,7 @@ import time
 import tests
 import argparse
 import urllib
+import json
 from os.path import exists
 
 parser = argparse.ArgumentParser(description='Send prompts to ChatGPT and analyze the resulting code')
@@ -29,8 +30,6 @@ args = parser.parse_args()
 # Load the necessary API key data
 with open(args.keys, 'r') as file:
     key_data = json.load(file)
-
-with open(args.key, "rt") as f: openai.api_key = f.readline()[:-1]
 
 model = None
 def chat(request, temp=args.temperature):

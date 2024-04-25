@@ -1,7 +1,8 @@
 Flask
 numpy
-openai
 pandas
 requests
 tqdm
 urllib3
+langchain_openai
+langchain_anthropic

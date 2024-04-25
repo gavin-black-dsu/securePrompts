@@ -10,10 +10,11 @@ import urllib
 from os.path import exists
 
 parser = argparse.ArgumentParser(description='Send prompts to ChatGPT and analyze the resulting code')
-parser.add_argument('-k', '--key', type=str, default=".key", help='File containing OpenAI API secret key')
+parser.add_argument('-k', '--keys', type=str, default="keys.json", help='File containing API secret keys')
 parser.add_argument('-m', '--model', type=str, default="gpt-3.5-turbo", help='ChatGPT model to use')
 parser.add_argument('-x', '--max_tokens', type=int, default=1024, help='Maximum number of tokens from ChatGPT')
 parser.add_argument('-b', '--backoff', type=int, default=25, help='Seconds to wait until retrying ChatGPT request')
+parser.add_argument('-a', '--attempts', type=int, default=10, help='Maximum number of attempts for making an LLM request')
 parser.add_argument('-d', '--delay', type=int, default=2, help='Seconds to wait for Flask server to start')
 parser.add_argument('-n', '--trials', type=int, default=10, help='Number of times to repeat testing')
 parser.add_argument('-t', '--temperature', type=float, default=1.0, help='Temperature to use for randomness')
@@ -24,6 +25,10 @@ parser.add_argument('-p', '--specification_prompts', type=str, default="./prompt
 parser.add_argument('-i', '--img_port', type=int, default=9021, help='Image server port, for CWE-434')
 parser.add_argument('output', type=str, default="results", help='Location to write results')
 args = parser.parse_args()
+
+# Load the necessary API key data
+with open(args.keys, 'r') as file:
+    key_data = json.load(file)
 
 with open(args.key, "rt") as f: openai.api_key = f.readline()[:-1]
 

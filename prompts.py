@@ -11,6 +11,7 @@ import json
 from os.path import exists
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage, SystemMessage
 
 parser = argparse.ArgumentParser(description='Send prompts to ChatGPT and analyze the resulting code')
@@ -43,9 +44,13 @@ def chat(request, temp=args.temperature):
             model = ChatOpenAI(  model_name=args.model, temperature=temp, api_key=key_data.get('openai', "Key not found"))
         elif args.model.startswith('claude'):
             model = ChatAnthropic(  model_name=args.model, temperature=temp, anthropic_api_key=key_data.get('claude', "Key not found") )
-    
+        elif args.model.startswith('gemini'):
+            print("Gemini")
+            model = ChatGoogleGenerativeAI(model=args.model, temperature=temp, google_api_key=key_data.get('gemini', "Key not found"))
+
     messages = [ HumanMessage(content=request),]
     backoff_counter = 0
+    response = None
     while backoff_counter < args.attempts:
         try: 
             print("Calling API")
@@ -60,7 +65,8 @@ def chat(request, temp=args.temperature):
             print(f"Failed to call API, waiting {sleep_time}s")
             time.sleep(sleep_time)
         #('Time (s)', end - start)
-    assert backoff_counter < 10, f"Was not able to complete request to {args.model}"
+    #assert backoff_counter < 10, f"Was not able to complete request to {args.model}"
+    if response is None: return ""
     return response.content
 
 # Gets a list of prompts based on the list file
@@ -88,7 +94,7 @@ assert contents == b'Working\n', f"Image server must be running on port {args.im
 
 leadInA = "Write code in the "
 leadInB = " programming language based on the specification below. The code section should have ''' before and after. \nSpecification:\n\"\"\"\n"
-leadInC = "\n\"\"\"\n"
+leadInC = "\n\"\"\"\n"# Ensure the code will run directly without further modification."
 
 # Read in the prompts
 prompts = getPrompts(args.security_prompts)
@@ -129,7 +135,7 @@ for (cwe,lang,s) in specs: # Step through each unique CWE test
                 if inCode and ("'''" in l or "```" in l): break
                 if inCode: code.append(l + "\n")
                 if "'''" in l or "```" in l: inCode = True
-        
+
             # Compile/run based on expected language
             assert lang in ["C", "Python"], f"{lang} is unsupported"
             compiled = True
@@ -140,7 +146,8 @@ for (cwe,lang,s) in specs: # Step through each unique CWE test
                 
                 # Clear any database files
                 for fileName in os.listdir("generated_code"):
-                    if fileName.endswith(".db") or fileName.endswith(".sqlite"): os.remove(os.path.join("generated_code", fileName))
+                    if fileName.endswith(".db") or fileName.endswith(".sqlite"):
+                        os.remove(os.path.join("generated_code", fileName))
 
                 # Remove any uploaded files
                 for fileName in os.listdir("generated_code/uploaded"):
@@ -179,5 +186,6 @@ for (cwe,lang,s) in specs: # Step through each unique CWE test
         dfResults = pd.concat([dfResults, newDf], ignore_index=True)
         #dfResults.to_pickle(args.output + ".pkl")
         dfResults.to_csv(args.output + ".csv")
+        dfResults.to_html(args.output + ".html")
 
 print(dfResults)

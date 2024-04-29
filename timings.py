@@ -7,10 +7,15 @@ import time
 import tests
 import argparse
 import urllib
+import json
 from os.path import exists
+from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import HumanMessage, SystemMessage
 
 parser = argparse.ArgumentParser(description='Send prompts to ChatGPT and analyze the resulting code')
-parser.add_argument('-k', '--key', type=str, default=".key", help='File containing OpenAI API secret key')
+parser.add_argument('-k', '--keys', type=str, default="keys.json", help='File containing OpenAI API secret key')
 parser.add_argument('-m', '--model', type=str, default="gpt-3.5-turbo", help='ChatGPT model to use')
 parser.add_argument('-x', '--max_tokens', type=int, default=2048, help='Maximum number of tokens from ChatGPT')
 parser.add_argument('-b', '--backoff', type=int, default=25, help='Seconds to wait until retrying ChatGPT request')
@@ -25,13 +30,49 @@ parser.add_argument('-p', '--specification_prompt', type=str, default="./prompts
 parser.add_argument('output', type=str, default="results", help='Location to write results')
 args = parser.parse_args()
 
-modelName = "GPT-3.5"
-if args.model != "gpt-3.5-turbo": modelName = "GPT-4"
 
-with open(args.key, "rt") as f: openai.api_key = f.readline()[:-1]
+modelLookup = { "gpt-3.5-turbo": "GPT-3.5", 
+                "gpt-4": "GPT-4", 
+                "gemini-pro": "Gemini 1.0", 
+                "claude-instant-1.2":  "Claude Instant", 
+                "claude-3-opus-20240229": "Claude Opus"
+              }
 
-def chat(message_history, temp=args.temperature):
+assert args.model in modelLookup.keys(), f"Model not in dictionary: {modelLookup}"
+modelName = modelLookup[args.model]
+print(modelName)
 
+# Load the necessary API key data
+with open(args.keys, 'r') as file:
+    key_data = json.load(file)
+
+model = None
+def chat(request, temp=args.temperature):
+    global model
+    # Load the model for the first time
+    if model is None:
+        if args.model.startswith('gpt'):
+            model = ChatOpenAI(  model_name=args.model, temperature=temp, api_key=key_data.get('openai', "Key not found"))
+        elif args.model.startswith('claude'):
+            model = ChatAnthropic(  model_name=args.model, temperature=temp, anthropic_api_key=key_data.get('claude', "Key not found") )
+        elif args.model.startswith('gemini'):
+            print("Gemini")
+            model = ChatGoogleGenerativeAI(model=args.model, temperature=temp, google_api_key=key_data.get('gemini', "Key not found"))
+    messages = [ HumanMessage(content=str(request)),]
+    response = None
+    
+    print("Calling API")
+    start = time.perf_counter()
+    response = model.invoke(messages)
+    end = time.perf_counter()
+    t = end - start
+    print(f"Time: {t}")
+    
+    if response is None: return ""
+    return (response.content, t)
+
+
+def chat_fail(message_history, temp=args.temperature):
     try:
         t0 = time.time()
         completion = openai.ChatCompletion.create(
